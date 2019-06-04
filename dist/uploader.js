@@ -280,17 +280,17 @@ utils.extend(Chunk.prototype, {
   },
 
   prepareXhrRequest: function (method, isTest, paramsMethod, blob) {
+    // ②这个index要如何获取呢？
+    let index = this.offset;
     // Add data from the query options
     var query = utils.evalOpts(this.uploader.opts.query, this.file, this, isTest)
-    query = utils.extend(this.getParams(), query)
+    query = utils.extend(this.getParams(), query[index])
 
     // processParams
     query = this.uploader.opts.processParams(query)
 
     var target = utils.evalOpts(this.uploader.opts.target, this.file, this, isTest)
     var data = null
-    // ②这个index要如何获取呢？
-    let index = this.offset;
     if (method === 'GET' || paramsMethod === 'octet') {
       // Add data from the query options
       var params = []
