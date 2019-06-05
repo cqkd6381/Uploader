@@ -1,8 +1,8 @@
 /*!
  * Uploader - Uploader library implements html5 file upload and provides multiple simultaneous, stable, fault tolerant and resumable uploads
- * @version v0.5.1
+ * @version v0.6.2
  * @author dolymood <dolymood@gmail.com>
- * @link https://github.com/simple-uploader/Uploader
+ * @link https://github.com/cqkd6381/Uploader
  * @license MIT
  */
 !function(e){if("object"==typeof exports)module.exports=e();else if("function"==typeof define&&define.amd)define(e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.Uploader=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
@@ -68,17 +68,16 @@ utils.extend(Chunk.prototype, {
     }
   },
 
-  // ①如果target为数组，['url_1', 'url_2', 'url_3'], getTarget需要一个index参数来判断当前是第几个分片
-  getTarget: function(target, params, index) {
-      if (!params.length) {
-          return target[index]
-      }
-      if (target[index].indexOf('?') < 0) {
-          target[index] += '?'
-      } else {
-          target[index] += '&'
-      }
-      return target[index] + params.join('&')
+  getTarget: function(target, params) {
+    if (!params.length) {
+      return target
+    }
+    if (target.indexOf('?') < 0) {
+      target += '?'
+    } else {
+      target += '&'
+    }
+    return target + params.join('&')
   },
 
   test: function () {
@@ -280,16 +279,15 @@ utils.extend(Chunk.prototype, {
   },
 
   prepareXhrRequest: function (method, isTest, paramsMethod, blob) {
-    // ②这个index要如何获取呢？
-    let index = this.offset;
+    console.log(22222222222)
+    let index = this.offset
     // Add data from the query options
-    var query = utils.evalOpts(this.uploader.opts.query, this.file, this, isTest)
-    query = utils.extend(this.getParams(), query[index])
-
+    var query = utils.evalOpts(this.uploader.opts.query[index], this.file, this, isTest)
+    query = utils.extend(this.getParams(), query)
     // processParams
     query = this.uploader.opts.processParams(query)
 
-    var target = utils.evalOpts(this.uploader.opts.target, this.file, this, isTest)
+    var target = this.uploader.opts.target[index]
     var data = null
     if (method === 'GET' || paramsMethod === 'octet') {
       // Add data from the query options
@@ -297,7 +295,7 @@ utils.extend(Chunk.prototype, {
       utils.each(query, function (v, k) {
         params.push([encodeURIComponent(k), encodeURIComponent(v)].join('='))
       })
-      target = this.getTarget(target, params, index)
+      target = this.getTarget(target, params)
       data = blob || null
     } else {
       // Add data from the query options
@@ -308,7 +306,6 @@ utils.extend(Chunk.prototype, {
       if (typeof blob !== 'undefined') {
         data.append(this.uploader.opts.fileParameterName, blob, this.file.name)
       }
-      target = target[index]
     }
 
     this.xhr.open(method, target, true)
@@ -383,7 +380,7 @@ var event = _dereq_('./event')
 var File = _dereq_('./file')
 var Chunk = _dereq_('./chunk')
 
-var version = '0.5.1'
+var version = '0.6.2'
 
 var isServer = typeof window === 'undefined'
 
@@ -458,7 +455,7 @@ Uploader.defaults = {
   fileParameterName: 'file',
   progressCallbacksInterval: 500,
   speedSmoothingFactor: 0.1,
-  query: {},
+  query: [],
   headers: {},
   withCredentials: false,
   preprocess: null,
@@ -467,7 +464,7 @@ Uploader.defaults = {
   uploadMethod: 'POST',
   prioritizeFirstAndLastChunk: false,
   allowDuplicateUploads: false,
-  target: '/',
+  target: [],
   testChunks: true,
   generateUniqueIdentifier: null,
   maxChunkRetries: 0,

@@ -60,16 +60,16 @@ utils.extend(Chunk.prototype, {
     }
   },
 
-  getTarget: function(target, params, index) {
-      if (!params.length) {
-          return target[index]
-      }
-      if (target[index].indexOf('?') < 0) {
-          target[index] += '?'
-      } else {
-          target[index] += '&'
-      }
-      return target[index] + params.join('&')
+  getTarget: function(target, params) {
+    if (!params.length) {
+      return target
+    }
+    if (target.indexOf('?') < 0) {
+      target += '?'
+    } else {
+      target += '&'
+    }
+    return target + params.join('&')
   },
 
   test: function () {
@@ -271,15 +271,15 @@ utils.extend(Chunk.prototype, {
   },
 
   prepareXhrRequest: function (method, isTest, paramsMethod, blob) {
-    let index = this.offset;
+    console.log(22222222222)
+    let index = this.offset
     // Add data from the query options
-    var query = utils.evalOpts(this.uploader.opts.query, this.file, this, isTest)
-    query = utils.extend(this.getParams(), query[index])
-
+    var query = utils.evalOpts(this.uploader.opts.query[index], this.file, this, isTest)
+    query = utils.extend(this.getParams(), query)
     // processParams
     query = this.uploader.opts.processParams(query)
 
-    var target = utils.evalOpts(this.uploader.opts.target, this.file, this, isTest)
+    var target = this.uploader.opts.target[index]
     var data = null
     if (method === 'GET' || paramsMethod === 'octet') {
       // Add data from the query options
@@ -287,7 +287,7 @@ utils.extend(Chunk.prototype, {
       utils.each(query, function (v, k) {
         params.push([encodeURIComponent(k), encodeURIComponent(v)].join('='))
       })
-      target = this.getTarget(target, params, index)
+      target = this.getTarget(target, params)
       data = blob || null
     } else {
       // Add data from the query options
@@ -298,7 +298,6 @@ utils.extend(Chunk.prototype, {
       if (typeof blob !== 'undefined') {
         data.append(this.uploader.opts.fileParameterName, blob, this.file.name)
       }
-      target = target[index]
     }
 
     this.xhr.open(method, target, true)
