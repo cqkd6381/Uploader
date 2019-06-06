@@ -78,7 +78,7 @@ Uploader.defaults = {
   fileParameterName: 'file',
   progressCallbacksInterval: 500,
   speedSmoothingFactor: 0.1,
-  query: [],
+  query: {},
   headers: {},
   withCredentials: false,
   preprocess: null,

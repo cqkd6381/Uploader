@@ -271,14 +271,18 @@ utils.extend(Chunk.prototype, {
   },
 
   prepareXhrRequest: function (method, isTest, paramsMethod, blob) {
-    console.log(11111111111111111)
     // Add data from the query options
-    var query = utils.evalOpts(this.uploader.opts.query[this.offset], this.file, this, isTest)
+    // var query = utils.evalOpts(this.uploader.opts.query[this.offset], this.file, this, isTest)
+    var query = utils.evalOpts(this.file.query[this.offset])
     query = utils.extend(this.getParams(), query)
     // processParams
     query = this.uploader.opts.processParams(query)
 
-    var target = this.uploader.opts.target[this.offset]
+    var target = this.file.target[this.offset]
+    console.log('------target start------')
+    console.log(this.file)
+    console.log(target)
+    console.log('------target end------')
     var data = null
     if (method === 'GET' || paramsMethod === 'octet') {
       // Add data from the query options
