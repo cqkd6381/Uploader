@@ -279,10 +279,6 @@ utils.extend(Chunk.prototype, {
     query = this.uploader.opts.processParams(query)
 
     var target = this.file.target[this.offset]
-    console.log('------target start------')
-    console.log(this.file)
-    console.log(target)
-    console.log('------target end------')
     var data = null
     if (method === 'GET' || paramsMethod === 'octet') {
       // Add data from the query options
