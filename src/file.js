@@ -301,6 +301,7 @@ utils.extend(File.prototype, {
   },
 
   resume: function () {
+    console.log('----resume-----')
     this._eachAccess(function (f) {
       f.resume()
     }, function () {
@@ -313,6 +314,7 @@ utils.extend(File.prototype, {
   },
 
   pause: function () {
+    console.log('----pause-----')
     this._eachAccess(function (f) {
       f.pause()
     }, function () {
@@ -320,7 +322,7 @@ utils.extend(File.prototype, {
       this.abort()
     })
     this.paused = true
-    this.removeUnfinishedChunk()
+    // this.removeUnfinishedChunk()
   },
 
   removeUnfinishedChunk: function () {
