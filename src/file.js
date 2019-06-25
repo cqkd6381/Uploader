@@ -320,6 +320,31 @@ utils.extend(File.prototype, {
       this.abort()
     })
     this.paused = true
+    this.removeUnfinishedChunk()
+  },
+
+  removeUnfinishedChunk: function () {
+    console.log('removeUnfinishedChunk')
+    var chunks = this.chunks
+    var uploadingStatus = Chunk.STATUS.UPLOADING
+    var upload_token = this.file.upload_token
+    var paramslist = chunks.filter((chunk, index) => {
+      if (chunk.xhr === null && chunk > 0 && preprocessState === null) {
+        return {
+          "upload_token": upload_token,
+          "cloud_file_key_num": index
+        }
+      }
+    })
+    if (paramslist.length) {
+      var xhr = new XMLHttpRequest()
+      xhr.open('post', 'http://222.195.70.116:8006/api/v2/file/swift/batch/delete', true)
+      xhr.setRequestHeader('X-auth-token', this.uploader.opts.headers."X-auth-token")
+      var data = {
+        "paramslist": paramslist
+      }
+      xhr.send(data)
+    }
   },
 
   cancel: function () {
