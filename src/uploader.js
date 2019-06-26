@@ -71,6 +71,7 @@ var webAPIFileRead = function (fileObj, fileType, startByte, endByte, chunk) {
 Uploader.version = version
 
 Uploader.defaults = {
+  removeChunkLink: null,
   chunkSize: 1024 * 1024,
   forceChunkSize: false,
   simultaneousUploads: 3,
