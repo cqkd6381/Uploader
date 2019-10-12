@@ -349,6 +349,7 @@ utils.extend(File.prototype, {
     this.currentSpeed = 0
     this.averageSpeed = 0
     this.aborted = !reset
+    this.pendedChunks = []
     var chunks = this.chunks
     if (reset) {
       this.chunks = []
@@ -356,6 +357,7 @@ utils.extend(File.prototype, {
     var uploadingStatus = Chunk.STATUS.UPLOADING
     utils.each(chunks, function (c) {
       if (c.status() === uploadingStatus) {
+        this.pendedChunks.push(c.offset)
         c.abort()
         this.uploader.uploadNextChunk()
       }
