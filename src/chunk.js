@@ -277,18 +277,20 @@ utils.extend(Chunk.prototype, {
     query = utils.extend(this.getParams(), query)
     // processParams
     query = this.uploader.opts.processParams(query)
-
     var target = this.file.target[this.offset]
     var data = null
-    if (method === 'GET' || paramsMethod === 'octet') {
+    // if (method === 'GET' || paramsMethod === 'octet') {
       // Add data from the query options
-      var params = []
-      utils.each(query, function (v, k) {
-        params.push([encodeURIComponent(k), encodeURIComponent(v)].join('='))
-      })
-      target = this.getTarget(target, params)
-      data = blob || null
-    } else {
+      // var params = []
+      // utils.each(query, function (v, k) {
+      //   params.push([encodeURIComponent(k), encodeURIComponent(v)].join('='))
+      // })
+      // target = this.getTarget(target, params)
+      // data = blob || null
+    // } else {
+
+    if (this.file.storage === 'openstack') {
+      // storage 为 openstack
       // Add data from the query options
       data = new FormData()
       utils.each(query, function (v, k) {
@@ -297,9 +299,12 @@ utils.extend(Chunk.prototype, {
       if (typeof blob !== 'undefined') {
         data.append(this.uploader.opts.fileParameterName, blob, this.file.name)
       }
+    } else if (this.file.storage === 'moss') {
+      // storage 为 moss
+      data = blob || null
     }
 
-    this.xhr.open(method, target, true)
+    this.xhr.open(query.chunkUploadMethod, target, true)
     this.xhr.withCredentials = this.uploader.opts.withCredentials
 
     // Add data from header options

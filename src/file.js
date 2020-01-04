@@ -43,6 +43,7 @@ function File (uploader, file, parent) {
   this._lastProgressCallback = Date.now()
   this._prevUploadedSize = 0
   this._prevProgress = 0
+  this.isMerged = false
 
   this.bootstrap()
 }
@@ -259,6 +260,10 @@ utils.extend(File.prototype, {
       }
       parent = parent.parent
     }
+  },
+
+  isMerge: function () {
+    return this.isMerged
   },
 
   isComplete: function () {
