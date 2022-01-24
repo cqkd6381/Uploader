@@ -509,6 +509,23 @@ utils.extend(Uploader.prototype, {
       drop: this._onDrop
     }, true)
     this._onDrop = null
+  },
+
+  onClick: function (evt) {
+    this._trigger(evt.type, evt)
+    if (this.opts.onDropStopPropagation) {
+      evt.stopPropagation()
+    }
+    evt.preventDefault()
+    this.addFiles(this.__files, evt)
+  },
+
+  assignClick: function (domNodes, files) {
+    this.__files = files
+    this._onClick = utils.bind(this.onClick, this)
+    this._assignHelper(domNodes, {
+      click: this._onClick
+    })
   }
 })
 
