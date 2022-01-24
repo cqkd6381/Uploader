@@ -1,6 +1,6 @@
 /*!
  * Uploader - Uploader library implements html5 file upload and provides multiple simultaneous, stable, fault tolerant and resumable uploads
- * @version v0.6.2
+ * @version v0.7.21
  * @author dolymood <dolymood@gmail.com>
  * @link https://github.com/cqkd6381/Uploader
  * @license MIT
@@ -279,25 +279,26 @@ utils.extend(Chunk.prototype, {
   },
 
   prepareXhrRequest: function (method, isTest, paramsMethod, blob) {
-    console.log(22222222222)
-    let index = this.offset
     // Add data from the query options
-    var query = utils.evalOpts(this.uploader.opts.query[index], this.file, this, isTest)
+    // var query = utils.evalOpts(this.uploader.opts.query[this.offset], this.file, this, isTest)
+    var query = utils.evalOpts(this.file.query[this.offset])
     query = utils.extend(this.getParams(), query)
     // processParams
     query = this.uploader.opts.processParams(query)
-
-    var target = this.uploader.opts.target[index]
+    var target = this.file.target[this.offset]
     var data = null
-    if (method === 'GET' || paramsMethod === 'octet') {
-      // Add data from the query options
-      var params = []
-      utils.each(query, function (v, k) {
-        params.push([encodeURIComponent(k), encodeURIComponent(v)].join('='))
-      })
-      target = this.getTarget(target, params)
-      data = blob || null
-    } else {
+    // if (method === 'GET' || paramsMethod === 'octet') {
+    // Add data from the query options
+    // var params = []
+    // utils.each(query, function (v, k) {
+    //   params.push([encodeURIComponent(k), encodeURIComponent(v)].join('='))
+    // })
+    // target = this.getTarget(target, params)
+    // data = blob || null
+    // } else {
+
+    if (this.file.storage === 'openstack') {
+      // storage 为 openstack
       // Add data from the query options
       data = new FormData()
       utils.each(query, function (v, k) {
@@ -306,9 +307,12 @@ utils.extend(Chunk.prototype, {
       if (typeof blob !== 'undefined') {
         data.append(this.uploader.opts.fileParameterName, blob, this.file.name)
       }
+    } else if (this.file.storage === 'moss') {
+      // storage 为 moss
+      data = blob || null
     }
 
-    this.xhr.open(method, target, true)
+    this.xhr.open(query.chunkUploadMethod, target, true)
     this.xhr.withCredentials = this.uploader.opts.withCredentials
 
     // Add data from header options
@@ -380,7 +384,7 @@ var event = _dereq_('./event')
 var File = _dereq_('./file')
 var Chunk = _dereq_('./chunk')
 
-var version = '0.6.2'
+var version = '0.7.21'
 
 var isServer = typeof window === 'undefined'
 
@@ -448,6 +452,7 @@ var webAPIFileRead = function (fileObj, fileType, startByte, endByte, chunk) {
 Uploader.version = version
 
 Uploader.defaults = {
+  removeChunkLink: null,
   chunkSize: 1024 * 1024,
   forceChunkSize: false,
   simultaneousUploads: 3,
@@ -455,7 +460,7 @@ Uploader.defaults = {
   fileParameterName: 'file',
   progressCallbacksInterval: 500,
   speedSmoothingFactor: 0.1,
-  query: [],
+  query: {},
   headers: {},
   withCredentials: false,
   preprocess: null,
@@ -885,6 +890,23 @@ utils.extend(Uploader.prototype, {
       drop: this._onDrop
     }, true)
     this._onDrop = null
+  },
+
+  onClick: function (evt) {
+    this._trigger(evt.type, evt)
+    if (this.opts.onDropStopPropagation) {
+      evt.stopPropagation()
+    }
+    evt.preventDefault()
+    this.addFiles(this.__files, evt)
+  },
+
+  assignClick: function (domNodes, files) {
+    this.__files = files
+    this._onClick = utils.bind(this.onClick, this)
+    this._assignHelper(domNodes, {
+      click: this._onClick
+    })
   }
 })
 
@@ -1034,7 +1056,9 @@ utils.extend(File.prototype, {
       }
     }
     if (this.parent && (hard || this.parent._checkProgress())) {
-      this.parent._measureSpeed()
+      // this.parent._measureSpeed()
+      // this.parent.currentSpeed = this.currentSpeed
+      this.parent.averageSpeed = this.averageSpeed
     }
   },
 
@@ -1242,6 +1266,7 @@ utils.extend(File.prototype, {
     this.currentSpeed = 0
     this.averageSpeed = 0
     this.aborted = !reset
+    this.pendedChunks = []
     var chunks = this.chunks
     if (reset) {
       this.chunks = []
@@ -1249,6 +1274,7 @@ utils.extend(File.prototype, {
     var uploadingStatus = Chunk.STATUS.UPLOADING
     utils.each(chunks, function (c) {
       if (c.status() === uploadingStatus) {
+        this.pendedChunks.push(c.offset)
         c.abort()
         this.uploader.uploadNextChunk()
       }
@@ -1596,7 +1622,7 @@ var utils = {
 
   formatSize: function (size) {
     if (size < 1024) {
-      return size.toFixed(0) + ' bytes'
+      return size.toFixed(0) + ' B'
     } else if (size < 1024 * 1024) {
       return (size / 1024.0).toFixed(0) + ' KB'
     } else if (size < 1024 * 1024 * 1024) {

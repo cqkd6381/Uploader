@@ -280,13 +280,13 @@ utils.extend(Chunk.prototype, {
     var target = this.file.target[this.offset]
     var data = null
     // if (method === 'GET' || paramsMethod === 'octet') {
-      // Add data from the query options
-      // var params = []
-      // utils.each(query, function (v, k) {
-      //   params.push([encodeURIComponent(k), encodeURIComponent(v)].join('='))
-      // })
-      // target = this.getTarget(target, params)
-      // data = blob || null
+    // Add data from the query options
+    // var params = []
+    // utils.each(query, function (v, k) {
+    //   params.push([encodeURIComponent(k), encodeURIComponent(v)].join('='))
+    // })
+    // target = this.getTarget(target, params)
+    // data = blob || null
     // } else {
 
     if (this.file.storage === 'openstack') {

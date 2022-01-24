@@ -141,7 +141,9 @@ utils.extend(File.prototype, {
       }
     }
     if (this.parent && (hard || this.parent._checkProgress())) {
-      this.parent._measureSpeed()
+      // this.parent._measureSpeed()
+      // this.parent.currentSpeed = this.currentSpeed
+      this.parent.averageSpeed = this.averageSpeed
     }
   },
 
